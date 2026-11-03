@@ -1,6 +1,7 @@
 import { Barlow_Condensed, Geist } from "next/font/google";
 import SiteHeader from "@/components/layout/SiteHeader";
 import SiteFooter from "@/components/layout/SiteFooter";
+import { getSiteUrl } from "@/lib/siteUrl";
 import { themeInitScript } from "@/lib/theme";
 import "./globals.css";
 
@@ -19,6 +20,7 @@ const display = Barlow_Condensed({
 // Site-wide SEO defaults. Individual pages can override `title` and the
 // template turns it into e.g. "Cricket | Playon".
 export const metadata = {
+  metadataBase: new URL(getSiteUrl()),
   title: {
     default: "Playon — Live cricket and football scores",
     template: "%s | Playon",

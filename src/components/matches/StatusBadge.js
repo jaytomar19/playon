@@ -11,8 +11,8 @@ const LABELS = {
 export default function StatusBadge({ status, minute = null }) {
   if (status === "live") {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-live px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-white">
-        <span aria-hidden="true" className="live-dot h-1.5 w-1.5 rounded-full bg-white" />
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-live px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-live-foreground">
+        <span aria-hidden="true" className="live-dot h-1.5 w-1.5 rounded-full bg-live-foreground" />
         Live
         {minute != null && <span className="tabular">{minute}&prime;</span>}
       </span>

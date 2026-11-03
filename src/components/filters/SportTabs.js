@@ -5,7 +5,7 @@ const SPORT_OPTIONS = [
 
 export default function SportTabs({ sport, onChange }) {
   return (
-    <div role="group" aria-label="Sport" className="inline-flex rounded-full border border-line bg-surface p-1">
+    <div role="group" aria-label="Sport" className="inline-flex w-fit rounded-full border border-line bg-surface p-1">
       {SPORT_OPTIONS.map((option) => {
         const active = option.value === sport;
         return (

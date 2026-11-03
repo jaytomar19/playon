@@ -6,7 +6,7 @@ export default function Home() {
     <div className="flex flex-col gap-10">
       {/* The hero keeps its dark "floodlit" look in both themes. */}
       <section className="relative overflow-hidden rounded-2xl bg-[#0e1511] px-6 py-10 text-[#edf2ea] sm:px-10 sm:py-14">
-        <HeroArt className="absolute inset-0 h-full w-full" />
+        <HeroArt className="absolute inset-0 h-full w-full opacity-40 sm:opacity-100" />
         <div className="relative flex max-w-xl flex-col gap-4">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#c6f135]">
             Cricket · Football

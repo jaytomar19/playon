@@ -5,8 +5,22 @@ import { fetchProviderJson, ProviderError, requireApiKey } from "./fetchProvider
 // CricketData.org (CricAPI): https://cricketdata.org/
 const BASE_URL = "https://api.cricapi.com/v1";
 
+// The live, fixtures and results lists all come from this one call, and the
+// browser asks for all three at once. While a call is in progress, later
+// callers share it instead of spending more of the 100 calls/day.
+let inFlight = null;
+
 // Returns every live match plus those from 7 days before and after today.
-export async function getCricketScores() {
+export function getCricketScores() {
+  if (!inFlight) {
+    inFlight = loadCricketScores().finally(() => {
+      inFlight = null;
+    });
+  }
+  return inFlight;
+}
+
+async function loadCricketScores() {
   const apiKey = requireApiKey("CRICKET_API_KEY");
   const url = `${BASE_URL}/cricScore?apikey=${encodeURIComponent(apiKey)}`;
 

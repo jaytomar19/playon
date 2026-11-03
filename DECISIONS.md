@@ -33,6 +33,11 @@ visitor shares the same cached answer and traffic does not spend quota.
 Browsers re-check Playon's own live endpoints every 60 s (only while the tab is
 visible). That reads our cache, not the provider.
 
+The browser asks for the three cricket lists at once. Simultaneous requests share one
+in-progress provider call (`cricketProvider.js`), so they don't triple usage. This
+only works within one server instance — if Vercel runs several, usage can be higher,
+so check the CricketData.org dashboard after launch and raise the cache time if needed.
+
 Cricket match details are looked up in the cached `cricScore` list instead of calling
 the provider again — so only recent/upcoming cricket matches have detail pages.
 

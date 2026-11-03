@@ -15,7 +15,9 @@ export default function MatchSection({ id, title, result, matches, emptyMessage,
   if (result.status === "loading") {
     body = <LoadingState label={`Loading ${title.toLowerCase()}`} />;
   } else if (result.status === "error") {
-    body = <ErrorState message={result.error.message} onRetry={result.retry} />;
+    // Retrying can't fix a missing API key, so no button in that case.
+    const canRetry = result.error.code !== "NOT_CONFIGURED";
+    body = <ErrorState message={result.error.message} onRetry={canRetry ? result.retry : null} />;
   } else if (total === 0) {
     body = <EmptyState message={emptyMessage} />;
   } else if (matches.length === 0 && filtersActive) {

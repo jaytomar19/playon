@@ -16,7 +16,8 @@
   --accent: #c6f135;            /* Playon "volt" — used as a fill */
   --accent-foreground: #0e1511; /* text on volt */
   --accent-text: #3b6500;       /* volt-family text readable on light bg */
-  --live: #d92d3a;
+  --live: #c62834;
+  --live-foreground: #ffffff;   /* text on the red LIVE badge */
   --cricket: #b4471f;
   --football: #1d7a45;
 }
@@ -32,6 +33,7 @@
   --accent-foreground: #0a0e0b;
   --accent-text: #c6f135;
   --live: #ff5a64;
+  --live-foreground: #0a0e0b;
   --cricket: #f08a5d;
   --football: #4cc985;
 }
@@ -47,6 +49,7 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-accent-text: var(--accent-text);
   --color-live: var(--live);
+  --color-live-foreground: var(--live-foreground);
   --color-cricket: var(--cricket);
   --color-football: var(--football);
   --font-sans: var(--font-geist-sans);

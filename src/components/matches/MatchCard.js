@@ -20,11 +20,11 @@ function TeamRow({ match, team }) {
 
   return (
     <li className="flex items-center gap-2">
+      <FavouriteButton sport={match.sport} team={team} />
       <TeamBadge team={team} sport={match.sport} />
       <span className={`min-w-0 flex-1 truncate font-semibold ${lost ? "text-muted" : ""}`}>
         {team.name}
       </span>
-      <FavouriteButton sport={match.sport} team={team} />
       <span className="min-w-10 text-right">
         {isFootball ? (
           team.goals !== null && (

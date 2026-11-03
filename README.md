@@ -63,6 +63,9 @@ copies those variables into the JavaScript sent to browsers.
 - **Cricket refreshes about every 20 minutes** to stay inside CricketData.org's
   100 calls/day, and only matches from 7 days either side of today are available.
 - No team logos (provider image terms). See [DECISIONS.md](DECISIONS.md).
+- **Development tip:** a hard refresh (Ctrl+Shift+R) or "Disable cache" in DevTools
+  makes `npm run dev` skip the server cache and call the providers directly. Use a
+  normal refresh to avoid spending the cricket quota.
 
 ## How it works
 
@@ -111,4 +114,12 @@ tests/                   Unit tests
 1. Push the repository to GitHub and import it in Vercel.
 2. Add `CRICKET_API_KEY` and `FOOTBALL_API_KEY` under Project → Settings →
    Environment Variables.
-3. Deploy, then check that the live site loads real data.
+3. Deploy, then run through this launch checklist on the live site:
+   - Home, Cricket and Football pages load real data (or honest empty states).
+   - A match detail page opens from a card.
+   - Theme and a favourite team survive a page refresh.
+   - `/robots.txt` and `/sitemap.xml` show the real site address.
+   - Search the browser DevTools Network tab: no request goes to a provider and no
+     API key appears anywhere.
+   - After a day, check CricketData.org's member area to confirm usage stays
+     under 100 calls/day.
