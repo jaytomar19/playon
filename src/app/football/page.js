@@ -1,3 +1,6 @@
+import SportHeader from "@/components/layout/SportHeader";
+import MatchBoard from "@/components/matches/MatchBoard";
+
 export const metadata = {
   title: "Football",
   description: "Live football scores, upcoming fixtures and recent results.",
@@ -5,9 +8,13 @@ export const metadata = {
 
 export default function FootballPage() {
   return (
-    <section className="flex flex-col gap-4">
-      <h1 className="text-3xl font-bold tracking-tight">Football</h1>
-      <p className="text-foreground/70">Football score data is not connected yet.</p>
-    </section>
+    <div className="flex flex-col gap-8">
+      <SportHeader
+        sport="football"
+        title="Football"
+        description="Live scores, fixtures and results from the 12 competitions on our data plan."
+      />
+      <MatchBoard initialSport="football" />
+    </div>
   );
 }

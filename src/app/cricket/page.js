@@ -1,3 +1,6 @@
+import SportHeader from "@/components/layout/SportHeader";
+import MatchBoard from "@/components/matches/MatchBoard";
+
 export const metadata = {
   title: "Cricket",
   description: "Live cricket scores, upcoming fixtures and recent results.",
@@ -5,9 +8,13 @@ export const metadata = {
 
 export default function CricketPage() {
   return (
-    <section className="flex flex-col gap-4">
-      <h1 className="text-3xl font-bold tracking-tight">Cricket</h1>
-      <p className="text-foreground/70">Cricket score data is not connected yet.</p>
-    </section>
+    <div className="flex flex-col gap-8">
+      <SportHeader
+        sport="cricket"
+        title="Cricket"
+        description="Live scores, plus fixtures and results from 7 days either side of today."
+      />
+      <MatchBoard initialSport="cricket" />
+    </div>
   );
 }
