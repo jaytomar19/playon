@@ -1,28 +1,19 @@
 import Link from "next/link";
-
-const NAV_LINKS = [
-  { href: "/cricket", label: "Cricket" },
-  { href: "/football", label: "Football" },
-];
+import Logo from "./Logo";
+import NavLinks from "./NavLinks";
+import ThemeToggle from "./ThemeToggle";
 
 export default function SiteHeader() {
   return (
-    <header className="border-b border-foreground/10">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4">
-        <Link href="/" className="text-xl font-bold tracking-tight">
-          Playon
+    <header className="sticky top-0 z-40 border-b border-line bg-background/85 backdrop-blur">
+      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
+        <Link href="/" aria-label="Playon home">
+          <Logo />
         </Link>
-        <nav aria-label="Sports">
-          <ul className="flex gap-6 text-sm font-medium">
-            {NAV_LINKS.map((link) => (
-              <li key={link.href}>
-                <Link href={link.href} className="hover:underline">
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        <div className="flex items-center gap-2">
+          <NavLinks />
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   );

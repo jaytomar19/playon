@@ -1,29 +1,29 @@
-import Link from "next/link";
+import HeroArt from "@/components/layout/HeroArt";
+import MatchBoard from "@/components/matches/MatchBoard";
 
 export default function Home() {
   return (
-    <section className="flex flex-col gap-6">
-      <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-        Live cricket and football scores
-      </h1>
-      <p className="max-w-2xl text-foreground/70">
-        Score data is not connected yet. Live scores, fixtures and results will
-        appear here once the sports data providers are integrated.
-      </p>
-      <div className="flex gap-4">
-        <Link
-          href="/cricket"
-          className="rounded-md border border-foreground/20 px-4 py-2 font-medium hover:bg-foreground/5"
-        >
-          Cricket
-        </Link>
-        <Link
-          href="/football"
-          className="rounded-md border border-foreground/20 px-4 py-2 font-medium hover:bg-foreground/5"
-        >
-          Football
-        </Link>
-      </div>
-    </section>
+    <div className="flex flex-col gap-10">
+      {/* The hero keeps its dark "floodlit" look in both themes. */}
+      <section className="relative overflow-hidden rounded-2xl bg-[#0e1511] px-6 py-10 text-[#edf2ea] sm:px-10 sm:py-14">
+        <HeroArt className="absolute inset-0 h-full w-full" />
+        <div className="relative flex max-w-xl flex-col gap-4">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#c6f135]">
+            Cricket · Football
+          </p>
+          <h1 className="font-display text-5xl font-bold uppercase leading-[0.95] sm:text-6xl">
+            Every run.
+            <br />
+            Every goal.
+          </h1>
+          <p className="text-[#b7c2ba]">
+            Live scores, fixtures and results, straight from the data. If a score isn&apos;t
+            available, we say so — we never guess.
+          </p>
+        </div>
+      </section>
+
+      <MatchBoard showSportTabs />
+    </div>
   );
 }
