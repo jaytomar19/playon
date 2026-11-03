@@ -28,7 +28,7 @@ async function loadMatch(sport, matchId) {
 
 export async function generateMetadata({ params }) {
   const { sport, matchId } = await params;
-  const result = await loadMatch(sport, decodeURIComponent(matchId));
+  const result = await loadMatch(sport, matchId);
   if (!result.match) return { title: "Match" };
   const [a, b] = result.match.teams;
   return {
@@ -51,10 +51,8 @@ function TeamPanel({ match, team }) {
         team.goals !== null && (
           <p className="font-display text-6xl font-bold tabular">{team.goals}</p>
         )
-      ) : team.score ? (
-        <CricketScore score={team.score} large />
       ) : (
-        <p className="text-sm text-muted">Yet to bat</p>
+        <CricketScore score={team.score} large />
       )}
       {match.sport === "football" && <p className="text-xs uppercase text-muted">{team.side}</p>}
     </div>
@@ -72,7 +70,7 @@ function Detail({ label, children }) {
 
 export default async function MatchPage({ params }) {
   const { sport, matchId } = await params;
-  const result = await loadMatch(sport, decodeURIComponent(matchId));
+  const result = await loadMatch(sport, matchId);
   if (result.notFound) notFound();
 
   const backLink = (
