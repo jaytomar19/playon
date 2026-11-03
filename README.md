@@ -5,96 +5,110 @@ shows real data from external sports APIs — live scores, upcoming fixtures,
 recent results and basic match details. It never invents scores: when data is
 unavailable, the site says so.
 
-> **Status:** Phase 1 (foundation) of 5. The site runs, but no sports data
-> provider is connected yet.
+## Features (V1)
 
-## V1 scope
-
-- Live cricket and football scores, upcoming fixtures, recent results
-- Basic match details (only fields the provider actually supplies)
-- Last-updated indicator
-- Sport and competition filters, team and competition search
-- Favourite teams and dark/light theme, stored in the browser (`localStorage`)
+- Live scores, upcoming fixtures (next 7 days) and recent results (last 7 days)
+- Basic match details — cricket: teams, scores, overs, status; football: teams,
+  goals, match minute, status, final result. Only fields the provider sends.
+- Honest "Updated X ago" indicator, with an out-of-date warning
+- Sport tabs, competition filter, team/competition search
+- Favourite teams (shown first) and dark/light theme, saved in the browser
 - Loading, error and empty states; responsive layout; SEO metadata
 
-Out of scope for V1: accounts, mobile app, news, notifications, betting,
-fantasy, social features, AI features and other sports.
+Out of scope: accounts, mobile app, news, notifications, betting, fantasy,
+social features, AI features and other sports.
 
 ## Tech stack
 
-| Area | Technology |
-| --- | --- |
-| Framework | Next.js (App Router) |
-| UI | React |
-| Language | JavaScript |
-| Styling | Tailwind CSS |
-| Backend endpoints | Next.js Route Handlers |
-| Hosting | Vercel |
-
-## Prerequisites
-
-- Node.js 20.9 or newer (developed with Node 24)
-- npm
+Next.js 16 (App Router) · React 19 · JavaScript · Tailwind CSS 4 · Lucide icons ·
+Next.js Route Handlers · Vercel
 
 ## Getting started
 
+Requires Node.js 20.9+ and npm.
+
 ```bash
 npm install
-cp .env.example .env.local   # then fill in values (not needed until Phase 3)
+cp .env.example .env.local   # add your API keys (see below)
 npm run dev                  # http://localhost:3000
 ```
 
-### Commands
+Without keys the site still runs and shows "This score source has not been
+configured yet" in each data section.
 
 | Command | What it does |
 | --- | --- |
-| `npm run dev` | Start the development server with hot reload |
-| `npm run build` | Create an optimised production build |
-| `npm run start` | Serve the production build locally |
-| `npm run lint` | Check the code with ESLint |
+| `npm run dev` | Development server with hot reload |
+| `npm run build` | Production build |
+| `npm run start` | Serve the production build |
+| `npm run lint` | ESLint |
+| `npm test` | Unit tests (Node's built-in test runner) |
 
-## Environment variables
+## API keys
 
-API keys live only in `.env.local` (ignored by Git) and in Vercel's project
-settings. They are read exclusively on the server. They must **never** use the
-`NEXT_PUBLIC_` prefix, because Next.js copies `NEXT_PUBLIC_` variables into the
-JavaScript sent to the browser. See `.env.example` for the variable names.
+| Variable | Provider | Sign up |
+| --- | --- | --- |
+| `CRICKET_API_KEY` | CricketData.org | https://cricketdata.org/ |
+| `FOOTBALL_API_KEY` | football-data.org | https://www.football-data.org/client/register |
 
-## Architecture
+Keys live only in `.env.local` (ignored by Git) and in Vercel's project settings,
+and are read only on the server. Never give them a `NEXT_PUBLIC_` prefix — Next.js
+copies those variables into the JavaScript sent to browsers.
+
+## Known data limitations
+
+- **Football scores are delayed** on football-data.org's free plan, which covers 12
+  competitions (Premier League, La Liga, Bundesliga, Serie A, Ligue 1, Champions
+  League, and others).
+- **Cricket refreshes about every 20 minutes** to stay inside CricketData.org's
+  100 calls/day, and only matches from 7 days either side of today are available.
+- No team logos (provider image terms). See [DECISIONS.md](DECISIONS.md).
+
+## How it works
 
 ```
-Browser ──► Playon pages ──► /api/... Route Handlers ──► provider adapter ──► sports API
-                                     ▲                         │
-                                     └── normalised JSON ◄─────┘
+Browser ──► /api/{sport}/{live|fixtures|results} ──► provider adapter ──► sports API
+   ▲                (Route Handler, server)              (adds API key)
+   └──────── Playon JSON ◄── normalizer ◄── fetch cache ◄──────┘
 ```
 
-The browser only calls Playon's own `/api/...` endpoints. Route Handlers run on
-the server, attach the secret API key, call the provider, convert the response
-into Playon's own data shape and return it. Swapping a provider means changing
-its adapter, not the UI.
-
-**Caching:** the project uses Next.js *Cache Components* (`cacheComponents: true`
-in `next.config.mjs`). Nothing is cached unless we opt in with the
-`"use cache"` directive, which lets us set exact cache lifetimes per data type
-once provider limits are known.
+- **Pages** (`src/app`) render the layout on the server. The match lists are
+  client components that call Playon's own `/api` endpoints, so filters, search
+  and favourites work instantly in the browser.
+- **Route Handlers** (`src/app/api`) validate input and return one consistent
+  shape: `{ success, sport, category, data, meta: { lastUpdated, source } }` or
+  `{ success: false, error: { code, message } }`.
+- **Provider adapters** (`src/lib/providers`) are the only code that knows
+  provider URLs and keys. **Normalizers** (`src/lib/sports`) convert each
+  provider's JSON into Playon's match shape, so swapping a provider doesn't
+  touch the UI.
+- **Caching:** provider responses are cached with Next.js's `fetch` cache, so all
+  visitors share one cached answer. Policy and reasoning: [DECISIONS.md](DECISIONS.md).
+- **Match detail pages** (`/match/[sport]/[matchId]`) are rendered on the server
+  directly from the same data layer.
 
 ### Folder layout
 
 ```
 src/
-├── app/           Pages, layouts and (later) /api Route Handlers
-└── components/    Reusable React components, grouped by purpose
+├── app/                 Pages, layout, error/loading/404, and api/ Route Handlers
+├── components/
+│   ├── layout/          Header, footer, logo, theme toggle, hero art
+│   ├── matches/         Match board, sections, cards, badges, timestamps
+│   ├── filters/         Sport tabs, competition filter, search
+│   └── states/          Loading, error and empty states
+├── hooks/               useSportsData, useFavourites, useNow
+└── lib/
+    ├── api/             Response helpers, validation, shared route logic
+    ├── providers/       CricketData.org and football-data.org adapters
+    ├── sports/          Normalizers, categories, filters, refresh policy
+    └── utils/           Small helpers (time formatting, slugs)
+tests/                   Unit tests
 ```
 
-More folders (`lib/providers`, `lib/sports`, `hooks`, …) are added when they
-receive real code.
+## Deployment (Vercel)
 
-## Data providers
-
-Not selected yet. Providers will be researched, compared and approved in
-Phase 3. Known free-tier limitations will be documented here.
-
-## Deployment
-
-Planned for Vercel in Phase 5. Environment variables must be added in the
-Vercel project settings.
+1. Push the repository to GitHub and import it in Vercel.
+2. Add `CRICKET_API_KEY` and `FOOTBALL_API_KEY` under Project → Settings →
+   Environment Variables.
+3. Deploy, then check that the live site loads real data.
