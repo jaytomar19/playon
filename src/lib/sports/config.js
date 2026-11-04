@@ -31,6 +31,7 @@ export const FOOTBALL = {
     fixtures: 30 * 60,
     results: 10 * 60,
     match: 60,
+    standings: 60 * 60,
   },
   staleAfter: {
     live: 5 * 60,

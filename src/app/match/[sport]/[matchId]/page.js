@@ -4,6 +4,7 @@ import { ChevronLeft } from "lucide-react";
 import CricketScore from "@/components/matches/CricketScore";
 import FavouriteButton from "@/components/matches/FavouriteButton";
 import LastUpdated from "@/components/matches/LastUpdated";
+import LeagueTable from "@/components/matches/LeagueTable";
 import LocalTime from "@/components/matches/LocalTime";
 import StatusBadge from "@/components/matches/StatusBadge";
 import TeamBadge from "@/components/matches/TeamBadge";
@@ -11,7 +12,7 @@ import ErrorState from "@/components/states/ErrorState";
 import { getErrorMessage } from "@/lib/api/responses";
 import { isValidMatchId, isValidSport } from "@/lib/api/validation";
 import { ProviderError } from "@/lib/providers/fetchProvider";
-import { getMatch } from "@/lib/sports/getMatches";
+import { getMatch, getMatchStandings } from "@/lib/sports/getMatches";
 
 // Loads the match, turning failures into a value instead of a crash.
 // Next.js de-duplicates the identical fetch made by generateMetadata.
@@ -130,6 +131,7 @@ export default async function MatchPage({ params }) {
 
   const { match, meta } = result;
   const details = match.details;
+  const standings = await getMatchStandings(match);
   const accent = sport === "cricket" ? "border-t-cricket" : "border-t-football";
 
   return (
@@ -195,6 +197,14 @@ export default async function MatchPage({ params }) {
             </Detail>
           )}
         </dl>
+
+        {standings && (
+          <LeagueTable
+            standings={standings}
+            competitionName={match.competition?.name}
+            highlightIds={match.teams.map((team) => team.id)}
+          />
+        )}
 
         <footer className="flex flex-col gap-1 border-t border-line pt-4 text-xs text-muted">
           <LastUpdated lastUpdated={meta.lastUpdated} staleAfterSeconds={meta.staleAfterSeconds} />

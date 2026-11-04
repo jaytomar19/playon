@@ -1,5 +1,9 @@
 import { getCricketMatchInfo, getCricketScores } from "../providers/cricketProvider.js";
-import { getFootballMatch, getFootballMatches } from "../providers/footballProvider.js";
+import {
+  getFootballMatch,
+  getFootballMatches,
+  getFootballStandings,
+} from "../providers/footballProvider.js";
 import { ProviderError } from "../providers/fetchProvider.js";
 import { selectCategory } from "./categorize.js";
 import { CRICKET, FOOTBALL } from "./config.js";
@@ -64,9 +68,48 @@ async function getCricketMatch(matchId) {
   }
 }
 
+// On the free plan the match lists contain every field the single-match
+// endpoint returns, so details are served from the (already cached) lists.
+// The live list is checked first because it refreshes most often. Only a
+// match outside the lists' date range costs a separate call (10 calls/min).
+async function getFootballMatchFromLists(matchId) {
+  for (const category of ["live", "results", "fixtures"]) {
+    try {
+      const { matches, fetchedAt } = await getFootballMatches(category);
+      const match = matches.find((item) => item.id === matchId);
+      if (match) return { match, meta: buildMeta("football", fetchedAt, "match") };
+    } catch {
+      // Fall through to the direct lookup below.
+    }
+  }
+  return null;
+}
+
+/**
+ * The league table for a football match's competition, or null when there
+ * isn't one (knockout cups) or it can't be loaded. The table is an optional
+ * extra, so failures never break the match page.
+ */
+export async function getMatchStandings(match) {
+  if (match.sport !== "football" || !match.competition?.id) return null;
+  try {
+    const { standings } = await getFootballStandings(
+      match.competition.id,
+      match.teams.map((team) => team.id),
+    );
+    return standings;
+  } catch (error) {
+    console.error(`[sports] standings unavailable: ${error.code ?? error.message}`);
+    return null;
+  }
+}
+
 // Returns `{ match: null }` when the match doesn't exist or isn't available.
 export async function getMatch(sport, matchId) {
   if (sport === "cricket") return getCricketMatch(matchId);
+
+  const fromLists = await getFootballMatchFromLists(matchId);
+  if (fromLists) return fromLists;
 
   try {
     const { match, fetchedAt } = await getFootballMatch(matchId);

@@ -1,5 +1,9 @@
 import { FOOTBALL } from "../sports/config.js";
-import { normalizeFootballList, normalizeFootballMatch } from "../sports/normalizeFootball.js";
+import {
+  normalizeFootballList,
+  normalizeFootballMatch,
+  normalizeFootballStandings,
+} from "../sports/normalizeFootball.js";
 import { fetchProviderJson, ProviderError, requireApiKey } from "./fetchProvider.js";
 
 // football-data.org v4: https://docs.football-data.org/general/v4/index.html
@@ -37,6 +41,16 @@ export async function getFootballMatches(category) {
     throw new ProviderError("SPORTS_DATA_UNAVAILABLE", "Unexpected response");
   }
   return { matches: normalizeFootballList(body.matches), fetchedAt };
+}
+
+// League tables change only after matches finish, so an hour of caching is
+// plenty: at most one call per competition per hour.
+export async function getFootballStandings(competitionId, teamIds) {
+  const { body, fetchedAt } = await request(
+    `/competitions/${encodeURIComponent(competitionId)}/standings`,
+    FOOTBALL.revalidate.standings,
+  );
+  return { standings: normalizeFootballStandings(body, teamIds), fetchedAt };
 }
 
 export async function getFootballMatch(matchId) {

@@ -22,13 +22,13 @@ function numberOrNull(value) {
   return Number.isFinite(value) ? value : null;
 }
 
-// "GROUP_STAGE" -> "Group stage". Regular league games use the matchday.
+// "Matchday 9", "Quarter finals" or "League stage · Matchday 4".
 function describeRound(raw) {
-  if (raw.stage && raw.stage !== "REGULAR_SEASON") {
-    const stage = raw.stage.toLowerCase().replace(/_/g, " ");
-    return stage.charAt(0).toUpperCase() + stage.slice(1);
-  }
-  return Number.isFinite(raw.matchday) ? `Matchday ${raw.matchday}` : null;
+  const matchday = Number.isFinite(raw.matchday) ? `Matchday ${raw.matchday}` : null;
+  if (!raw.stage || raw.stage === "REGULAR_SEASON") return matchday;
+  const stage = raw.stage.toLowerCase().replace(/_/g, " ");
+  const label = stage.charAt(0).toUpperCase() + stage.slice(1);
+  return matchday ? `${label} · ${matchday}` : label;
 }
 
 function describeHalfTime(score) {
@@ -37,12 +37,18 @@ function describeHalfTime(score) {
   return home === null || away === null ? null : { home, away };
 }
 
+// Only HTTPS image links from the provider are used as club crests.
+function crestOrNull(url) {
+  return typeof url === "string" && url.startsWith("https://") ? url : null;
+}
+
 function normalizeTeam(raw, side, goals) {
   if (!raw || raw.id == null || !raw.name) return null;
   return {
     id: String(raw.id),
     name: raw.name,
     shortName: raw.tla || raw.shortName || null,
+    logo: crestOrNull(raw.crest),
     side,
     goals: numberOrNull(goals),
   };
@@ -82,6 +88,46 @@ export function normalizeFootballMatch(raw) {
     },
     providerUpdatedAt: raw.lastUpdated || null,
   };
+}
+
+/**
+ * A competition's league table from /v4/competitions/{id}/standings.
+ * Picks the overall ("TOTAL") table that contains one of `teamIds` (cups with
+ * groups have one table per group). Returns null when there's no table, e.g.
+ * for knockout-only competitions.
+ */
+export function normalizeFootballStandings(raw, teamIds = []) {
+  const tables = Array.isArray(raw?.standings)
+    ? raw.standings.filter((block) => block.type === "TOTAL" && Array.isArray(block.table))
+    : [];
+  if (tables.length === 0) return null;
+
+  const hasTeam = (block) => block.table.some((row) => teamIds.includes(String(row.team?.id)));
+  const chosen = tables.find(hasTeam) ?? tables[0];
+
+  const rows = chosen.table
+    .filter((row) => row.team?.id != null && row.team?.name)
+    .map((row) => ({
+      position: numberOrNull(row.position),
+      team: {
+        id: String(row.team.id),
+        name: row.team.name,
+        shortName: row.team.tla || row.team.shortName || null,
+        logo: crestOrNull(row.team.crest),
+      },
+      played: numberOrNull(row.playedGames),
+      won: numberOrNull(row.won),
+      draw: numberOrNull(row.draw),
+      lost: numberOrNull(row.lost),
+      goalDifference: numberOrNull(row.goalDifference),
+      points: numberOrNull(row.points),
+    }));
+
+  if (rows.length === 0) return null;
+  const group = typeof chosen.group === "string" && chosen.group.startsWith("GROUP_")
+    ? `Group ${chosen.group.slice(6)}`
+    : null;
+  return { group, rows };
 }
 
 export function normalizeFootballList(rawList) {

@@ -19,8 +19,11 @@ parsed. Two findings: `matchType` can be empty, and for multi-day (Test/first-cl
 matches the feed sends **one innings per team**, so those cards say so. The response
 also echoes the API key in an `apikey` field, which Playon never passes on.
 
-**Still to verify with a real key:** the size of football-data.org's free-plan delay,
-and whether `minute` is sent on the free plan.
+**Football verified with a real key (2026-11-04):** field names match; 213 matches
+from 10 competitions all parsed. The free plan sends **no `minute`** and
+**`venue: null`** (both appear to need a paid tier), so live football shows "LIVE"
+without a minute and no venue. Half-time score and round are available. The exact
+size of the free-plan score delay is not documented.
 
 ## Scope change: richer match details (approved 2026-11-04)
 
@@ -28,8 +31,11 @@ The project owner approved extending match detail pages beyond the original V1 f
 
 - **Cricket:** every innings (team, innings number, runs/wickets, overs), venue, toss —
   from CricAPI's `match_info` endpoint.
-- **Football:** venue, round (matchday or cup stage) and half-time score — already
-  included in football-data.org's match data.
+- **Football:** round (matchday or cup stage) and half-time score, plus venue if a
+  paid plan ever supplies it. These are already in the match lists, so football
+  detail pages are served from the cached lists at no extra cost; only a match
+  outside the lists' dates triggers a separate call. (Found when the 10 calls/minute
+  limit was hit during testing.)
 
 Lineups, scorecards, commentary and statistics remain out of scope.
 
@@ -53,7 +59,7 @@ visitor shares the same cached answer and traffic does not spend quota.
 | Cricket (all lists + details) | 20 min | 100 calls/day → at most 72 calls/day, leaving headroom |
 | Football live | 60 s | Comfortably within 10 calls/min |
 | Football fixtures / results | 30 min / 10 min | Change rarely |
-| Football match details | 60 s | Per match |
+| Football match details | From the cached lists; 60 s for older matches | Avoids the 10/min limit |
 
 Browsers re-check Playon's own live endpoints every 60 s (only while the tab is
 visible). That reads our cache, not the provider.

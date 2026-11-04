@@ -1,9 +1,30 @@
-// A short-code tile in place of a logo (provider logos aren't used: see
-// DECISIONS.md). Falls back to the first letters of the team name.
-export default function TeamBadge({ team, sport, large = false }) {
+import Image from "next/image";
+
+// The club crest when the provider supplies one (football), otherwise a
+// short-code tile (cricket: its provider forbids hotlinking images).
+export default function TeamBadge({ team, sport, large = false, small = false }) {
+  const size = large ? "h-14 w-14 text-lg" : small ? "h-6 w-6 text-[0.6rem]" : "h-9 w-9 text-xs";
+  const pixels = large ? 56 : small ? 24 : 36;
+
+  if (team.logo) {
+    return (
+      <span aria-hidden="true" className={`flex shrink-0 items-center justify-center ${size}`}>
+        {/* `unoptimized`: crests are tiny already, and this avoids spending
+            Vercel's image-optimization quota. */}
+        <Image
+          src={team.logo}
+          alt=""
+          width={pixels}
+          height={pixels}
+          unoptimized
+          className="h-full w-full object-contain"
+        />
+      </span>
+    );
+  }
+
   const code = (team.shortName || team.name.slice(0, 3)).slice(0, 4).toUpperCase();
   const ring = sport === "cricket" ? "border-cricket" : "border-football";
-  const size = large ? "h-14 w-14 text-lg" : "h-9 w-9 text-xs";
 
   return (
     <span

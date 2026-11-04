@@ -9,8 +9,8 @@ unavailable, the site says so.
 
 - Live scores, upcoming fixtures (next 7 days) and recent results (last 7 days)
 - Match details — cricket: teams, every innings with overs, status, venue, toss;
-  football: teams, goals, match minute, status, final result, half-time score,
-  venue, round. Only fields the provider sends.
+  football: teams, goals, status, final result, half-time score, round. Only
+  fields the provider sends (the free football plan has no match minute or venue).
 - Honest "Updated X ago" indicator, with an out-of-date warning
 - Sport tabs, competition filter, team/competition search
 - Favourite teams (shown first) and dark/light theme, saved in the browser
