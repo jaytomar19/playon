@@ -10,6 +10,14 @@ export const CRICKET = {
   // feeds all three categories. Free plan = 100 calls/day. Caching for
   // 20 minutes means at most 72 calls/day, leaving headroom for development.
   revalidate: 20 * 60,
+  // Detail pages also call `match_info` (1 call per match opened). Finished
+  // matches don't change, so they're cached for a day.
+  matchInfoRevalidate: {
+    live: 20 * 60,
+    completed: 24 * 60 * 60,
+    cancelled: 24 * 60 * 60,
+    default: 6 * 60 * 60,
+  },
   // Shown in the UI when data is older than this.
   staleAfter: 45 * 60,
   notice: "Cricket scores refresh about every 20 minutes on the free data plan.",

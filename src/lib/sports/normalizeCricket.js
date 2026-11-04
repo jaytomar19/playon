@@ -90,6 +90,62 @@ export function normalizeCricketMatch(raw) {
   };
 }
 
+// --- Match Info (detail pages only) ----------------------------------------
+
+function ordinal(n) {
+  const suffix = n % 100 >= 11 && n % 100 <= 13 ? "th" : { 1: "st", 2: "nd", 3: "rd" }[n % 10] ?? "th";
+  return `${n}${suffix}`;
+}
+
+// Finds which of the match's teams a provider name refers to (any case).
+function findTeamName(teamNames, text) {
+  const wanted = String(text ?? "").trim().toLowerCase();
+  return teamNames.find((name) => name.toLowerCase() === wanted) ?? null;
+}
+
+// Labels look like "sikkim Inning 1" or "Manipur,Sikkim Inning 1"; in the
+// second form the batting team is the name before the comma. If a label
+// can't be matched to a team, the provider's text is kept as-is.
+function describeInning(label, teamNames) {
+  const match = String(label ?? "").match(/^(.*?)\s+Inning\s+(\d+)$/i);
+  if (!match) return { team: null, label: label || null };
+  const team = findTeamName(teamNames, match[1].split(",")[0]);
+  if (!team) return { team: null, label };
+  return { team, label: `${ordinal(Number(match[2]))} innings` };
+}
+
+/**
+ * Extra details from the `match_info` endpoint: every innings, venue and toss.
+ * `teamNames` are the names already shown on the page, used to tidy the
+ * provider's lowercase or combined team labels.
+ */
+export function normalizeCricketMatchInfo(raw, teamNames) {
+  if (!raw || typeof raw !== "object") return null;
+
+  const innings = Array.isArray(raw.score)
+    ? raw.score
+        .filter((inning) => Number.isFinite(inning?.r))
+        .map((inning) => ({
+          ...describeInning(inning.inning, teamNames),
+          runs: inning.r,
+          wickets: Number.isFinite(inning.w) ? inning.w : null,
+          overs: Number.isFinite(inning.o) ? String(inning.o) : null,
+        }))
+    : [];
+
+  const tossTeam = raw.tossWinner ? findTeamName(teamNames, raw.tossWinner) ?? raw.tossWinner : null;
+  const toss =
+    tossTeam && typeof raw.tossChoice === "string" && raw.tossChoice
+      ? `${tossTeam} won the toss and chose to ${raw.tossChoice.toLowerCase()}`
+      : null;
+
+  return {
+    venue: typeof raw.venue === "string" && raw.venue.trim() ? raw.venue.trim() : null,
+    toss,
+    innings,
+  };
+}
+
 export function normalizeCricketList(rawList) {
   if (!Array.isArray(rawList)) return [];
   return rawList.map(normalizeCricketMatch).filter(Boolean);

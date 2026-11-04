@@ -59,6 +59,41 @@ function TeamPanel({ match, team }) {
   );
 }
 
+// Every innings in batting order, as sent by the provider.
+function InningsList({ innings }) {
+  return (
+    <section aria-labelledby="innings-heading" className="flex flex-col gap-2 border-t border-line pt-5">
+      <h2 id="innings-heading" className="font-display text-xl font-bold uppercase">
+        Innings
+      </h2>
+      <ol className="flex flex-col divide-y divide-line">
+        {innings.map((inning, index) => (
+          <li key={index} className="flex items-baseline justify-between gap-3 py-2">
+            <span className="min-w-0">
+              {inning.team ? (
+                <>
+                  <span className="font-semibold">{inning.team}</span>{" "}
+                  <span className="text-sm text-muted">{inning.label}</span>
+                </>
+              ) : (
+                <span className="text-muted">{inning.label ?? `Innings ${index + 1}`}</span>
+              )}
+            </span>
+            <span className="flex shrink-0 items-baseline gap-1.5">
+              <span className="font-display text-xl font-bold tabular">
+                {inning.wickets === null ? inning.runs : `${inning.runs}/${inning.wickets}`}
+              </span>
+              {inning.overs !== null && (
+                <span className="text-xs text-muted tabular">({inning.overs} ov)</span>
+              )}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
 function Detail({ label, children }) {
   return (
     <div className="flex flex-col gap-0.5">
@@ -94,6 +129,7 @@ export default async function MatchPage({ params }) {
   }
 
   const { match, meta } = result;
+  const details = match.details;
   const accent = sport === "cricket" ? "border-t-cricket" : "border-t-football";
 
   return (
@@ -128,6 +164,8 @@ export default async function MatchPage({ params }) {
         )}
         {match.scoreNote && <p className="text-center text-sm text-muted">{match.scoreNote}</p>}
 
+        {details?.innings?.length > 0 && <InningsList innings={details.innings} />}
+
         <dl className="grid gap-4 border-t border-line pt-5 text-sm sm:grid-cols-3">
           {match.startTime && (
             <Detail label="Start time">
@@ -135,6 +173,17 @@ export default async function MatchPage({ params }) {
             </Detail>
           )}
           {match.matchType && <Detail label="Format">{match.matchType}</Detail>}
+          {details?.round && <Detail label="Round">{details.round}</Detail>}
+          {details?.venue && <Detail label="Venue">{details.venue}</Detail>}
+          {details?.toss && <Detail label="Toss">{details.toss}</Detail>}
+          {details?.halfTime && (
+            <Detail label="Half-time">
+              <span className="tabular">
+                {match.teams[0].shortName ?? match.teams[0].name} {details.halfTime.home} –{" "}
+                {details.halfTime.away} {match.teams[1].shortName ?? match.teams[1].name}
+              </span>
+            </Detail>
+          )}
           {match.sport === "football" && match.status === "live" && (
             <Detail label="Match minute">
               {match.minute != null ? `${match.minute}′` : "Not provided"}
@@ -149,6 +198,9 @@ export default async function MatchPage({ params }) {
 
         <footer className="flex flex-col gap-1 border-t border-line pt-4 text-xs text-muted">
           <LastUpdated lastUpdated={meta.lastUpdated} staleAfterSeconds={meta.staleAfterSeconds} />
+          {match.detailsUnavailable && (
+            <p>Extra match details (innings, venue, toss) are unavailable right now.</p>
+          )}
           <p>
             Source: {meta.source}. {meta.notice}
           </p>

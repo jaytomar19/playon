@@ -22,6 +22,21 @@ function numberOrNull(value) {
   return Number.isFinite(value) ? value : null;
 }
 
+// "GROUP_STAGE" -> "Group stage". Regular league games use the matchday.
+function describeRound(raw) {
+  if (raw.stage && raw.stage !== "REGULAR_SEASON") {
+    const stage = raw.stage.toLowerCase().replace(/_/g, " ");
+    return stage.charAt(0).toUpperCase() + stage.slice(1);
+  }
+  return Number.isFinite(raw.matchday) ? `Matchday ${raw.matchday}` : null;
+}
+
+function describeHalfTime(score) {
+  const home = numberOrNull(score?.halfTime?.home);
+  const away = numberOrNull(score?.halfTime?.away);
+  return home === null || away === null ? null : { home, away };
+}
+
 function normalizeTeam(raw, side, goals) {
   if (!raw || raw.id == null || !raw.name) return null;
   return {
@@ -59,6 +74,12 @@ export function normalizeFootballMatch(raw) {
     minute: mapped.status === "live" ? (raw.minute ?? null) : null,
     winner: raw.score?.winner ?? null,
     durationText: DURATION_TEXT[raw.score?.duration] ?? null,
+    // Extra detail-page fields; each is null when the provider doesn't send it.
+    details: {
+      venue: typeof raw.venue === "string" && raw.venue ? raw.venue : null,
+      round: describeRound(raw),
+      halfTime: describeHalfTime(raw.score),
+    },
     providerUpdatedAt: raw.lastUpdated || null,
   };
 }

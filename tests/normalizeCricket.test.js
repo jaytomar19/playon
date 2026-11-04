@@ -3,6 +3,7 @@ import { test } from "node:test";
 import {
   normalizeCricketList,
   normalizeCricketMatch,
+  normalizeCricketMatchInfo,
   parseCricketScore,
 } from "../src/lib/sports/normalizeCricket.js";
 
@@ -104,6 +105,43 @@ test("empty matchType becomes null and teams without codes still get IDs", () =>
   assert.equal(match.matchType, null);
   assert.equal(match.teams[0].id, "uae-bulls");
   assert.equal(match.teams[0].shortName, null);
+});
+
+// Copied from a real match_info response (2026-11-04).
+const realMatchInfo = {
+  venue: "Gujarat College Ground, Ahmedabad",
+  score: [
+    { r: 432, w: 10, o: 133.3, inning: "sikkim Inning 1" },
+    { r: 289, w: 10, o: 108.2, inning: "Manipur,Sikkim Inning 1" },
+    { r: 81, w: 0, o: 25, inning: "sikkim Inning 2" },
+  ],
+  tossWinner: "sikkim",
+  tossChoice: "bat",
+};
+
+test("match info lists every innings with tidy team names", () => {
+  const details = normalizeCricketMatchInfo(realMatchInfo, ["Manipur", "Sikkim"]);
+  assert.equal(details.venue, "Gujarat College Ground, Ahmedabad");
+  assert.equal(details.toss, "Sikkim won the toss and chose to bat");
+  assert.deepEqual(details.innings, [
+    { team: "Sikkim", label: "1st innings", runs: 432, wickets: 10, overs: "133.3" },
+    { team: "Manipur", label: "1st innings", runs: 289, wickets: 10, overs: "108.2" },
+    { team: "Sikkim", label: "2nd innings", runs: 81, wickets: 0, overs: "25" },
+  ]);
+});
+
+test("match info keeps unmatched labels as-is and handles missing fields", () => {
+  const details = normalizeCricketMatchInfo(
+    { score: [{ r: 50, inning: "Mystery XI Inning 1" }, { r: 10, inning: "odd label" }] },
+    ["Manipur", "Sikkim"],
+  );
+  assert.deepEqual(details.innings, [
+    { team: null, label: "Mystery XI Inning 1", runs: 50, wickets: null, overs: null },
+    { team: null, label: "odd label", runs: 10, wickets: null, overs: null },
+  ]);
+  assert.equal(details.venue, null);
+  assert.equal(details.toss, null);
+  assert.equal(normalizeCricketMatchInfo(null, []), null);
 });
 
 test("skips invalid matches", () => {

@@ -55,6 +55,26 @@ test("missing optional fields stay null", () => {
   assert.equal(match.providerUpdatedAt, null);
 });
 
+test("adds venue, round and half-time when supplied", () => {
+  const match = normalizeFootballMatch({
+    ...finished,
+    venue: "Emirates Stadium",
+    matchday: 27,
+    stage: "REGULAR_SEASON",
+    score: { ...finished.score, halfTime: { home: 1, away: 0 } },
+  });
+  assert.deepEqual(match.details, {
+    venue: "Emirates Stadium",
+    round: "Matchday 27",
+    halfTime: { home: 1, away: 0 },
+  });
+
+  const cup = normalizeFootballMatch({ ...finished, stage: "QUARTER_FINALS", matchday: null });
+  assert.equal(cup.details.round, "Quarter finals");
+  assert.equal(cup.details.venue, null);
+  assert.equal(cup.details.halfTime, null);
+});
+
 test("unknown statuses map to unknown", () => {
   assert.equal(normalizeFootballMatch({ ...finished, status: "SOMETHING_NEW" }).status, "unknown");
 });
