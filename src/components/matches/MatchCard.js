@@ -72,6 +72,7 @@ export default function MatchCard({ match }) {
       <footer className="flex items-end justify-between gap-3 border-t border-line pt-3 text-sm">
         <div className="min-w-0 text-muted">
           {text && <p className="text-foreground">{text}</p>}
+          {match.scoreNote && <p className="text-xs">{match.scoreNote}</p>}
           <LocalTime iso={match.startTime} className="text-xs" />
         </div>
         <Link

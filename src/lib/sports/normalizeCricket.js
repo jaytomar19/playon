@@ -2,9 +2,8 @@ import { slugify } from "../utils/slugify.js";
 
 // Converts CricketData.org `cricScore` matches into Playon's match shape.
 //
-// The field names below (t1, t2, t1s, t2s, ms, series, dateTimeGMT, …) come
-// from the provider's documentation pages and must be re-checked against a
-// real response once an API key is available.
+// Field names (t1, t2, t1s, t2s, ms, series, dateTimeGMT, …) were checked
+// against a real response on 2026-11-04.
 
 const STATUS_BY_MS = {
   fixture: "upcoming",
@@ -70,6 +69,7 @@ export function normalizeCricketMatch(raw) {
   if (teams.includes(null)) return null;
 
   const series = typeof raw.series === "string" && raw.series.trim() ? raw.series.trim() : null;
+  const matchType = typeof raw.matchType === "string" && raw.matchType ? raw.matchType.toUpperCase() : null;
 
   return {
     id: String(raw.id),
@@ -79,7 +79,13 @@ export function normalizeCricketMatch(raw) {
     status: STATUS_BY_MS[raw.ms] ?? "unknown",
     statusText: typeof raw.status === "string" && raw.status ? raw.status : null,
     startTime: toIsoTime(raw.dateTimeGMT),
-    matchType: typeof raw.matchType === "string" ? raw.matchType.toUpperCase() : null,
+    matchType,
+    // For multi-day matches the feed sends one innings per team, so the
+    // score shown may not be the full match score. Say so rather than imply it.
+    scoreNote:
+      matchType === "TEST" && teams.some((team) => team.score)
+        ? "Only one innings per team is shown by the data feed."
+        : null,
     providerUpdatedAt: null,
   };
 }

@@ -126,6 +126,7 @@ export default async function MatchPage({ params }) {
             {match.durationText && <span className="text-muted"> · {match.durationText}</span>}
           </p>
         )}
+        {match.scoreNote && <p className="text-center text-sm text-muted">{match.scoreNote}</p>}
 
         <dl className="grid gap-4 border-t border-line pt-5 text-sm sm:grid-cols-3">
           {match.startTime && (

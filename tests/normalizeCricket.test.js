@@ -72,6 +72,40 @@ test("handles missing optional fields and team names without codes", () => {
   assert.equal(match.matchType, null);
 });
 
+// Copied from a real cricScore response (2026-11-04).
+const realTest = {
+  id: "real-test-1",
+  dateTimeGMT: "2026-11-02T04:00:00",
+  matchType: "test",
+  status: "Day 3: Stumps - Sikkim lead by 224 runs",
+  ms: "live",
+  t1: "Manipur [MNP]",
+  t2: "Sikkim [SKM]",
+  t1s: "289/10 (108.2)",
+  t2s: "81/0 (25)",
+  series: "Ranji Trophy Plate 2026-27",
+};
+
+test("handles real multi-day matches and flags the one-innings limit", () => {
+  const match = normalizeCricketMatch(realTest);
+  assert.deepEqual(match.teams[0].score.innings, [{ runs: 289, wickets: 10, overs: "108.2" }]);
+  assert.equal(match.matchType, "TEST");
+  assert.match(match.scoreNote, /one innings per team/);
+  assert.equal(normalizeCricketMatch({ ...realTest, matchType: "t20" }).scoreNote, null);
+  assert.equal(
+    normalizeCricketMatch({ ...realTest, ms: "fixture", t1s: "", t2s: "" }).scoreNote,
+    null,
+    "no note before any score exists",
+  );
+});
+
+test("empty matchType becomes null and teams without codes still get IDs", () => {
+  const match = normalizeCricketMatch({ ...realTest, matchType: "", t1: "Uae Bulls" });
+  assert.equal(match.matchType, null);
+  assert.equal(match.teams[0].id, "uae-bulls");
+  assert.equal(match.teams[0].shortName, null);
+});
+
 test("skips invalid matches", () => {
   assert.deepEqual(normalizeCricketList([{ id: "x", t1: "A" }, null, {}]), []);
   assert.deepEqual(normalizeCricketList("nope"), []);

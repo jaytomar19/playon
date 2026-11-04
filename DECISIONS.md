@@ -13,10 +13,14 @@
 Chosen as the best-documented free options. API-Football was not chosen because its
 free-plan season limits could not be verified.
 
-**Still to verify with real keys:** CricAPI's exact `cricScore` field names (the
-normalizer is written from its documentation pages and tested with assumed data),
-the size of football-data.org's free-plan delay, and whether `minute` is sent on the
-free plan.
+**Verified with a real key (2026-11-04):** CricAPI's `cricScore` field names match the
+normalizer; one response held 134 matches (16 live, 49 fixtures, 69 results) and all
+parsed. Two findings: `matchType` can be empty, and for multi-day (Test/first-class)
+matches the feed sends **one innings per team**, so those cards say so. The response
+also echoes the API key in an `apikey` field, which Playon never passes on.
+
+**Still to verify with a real key:** the size of football-data.org's free-plan delay,
+and whether `minute` is sent on the free plan.
 
 ## Refresh / cache policy
 
