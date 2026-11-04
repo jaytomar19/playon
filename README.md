@@ -118,7 +118,7 @@ tests/                   Unit tests
 1. Push the repository to GitHub and import it in Vercel.
 2. Add `CRICKET_API_KEY` and `FOOTBALL_API_KEY` under Project → Settings →
    Environment Variables.
-3. Deploy, then run through this launch checklist on the live site:
+3. Deploy, then run through this launch checklist on the live site->
    - Home, Cricket and Football pages load real data (or honest empty states).
    - A match detail page opens from a card.
    - Theme and a favourite team survive a page refresh.
