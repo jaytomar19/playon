@@ -77,7 +77,8 @@ async function getFootballMatchFromLists(matchId) {
     try {
       const { matches, fetchedAt } = await getFootballMatches(category);
       const match = matches.find((item) => item.id === matchId);
-      if (match) return { match, meta: buildMeta("football", fetchedAt, "match") };
+      // Staleness follows the list the match came from (e.g. results refresh every 10 min).
+      if (match) return { match, meta: buildMeta("football", fetchedAt, category) };
     } catch {
       // Fall through to the direct lookup below.
     }

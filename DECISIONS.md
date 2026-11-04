@@ -88,10 +88,25 @@ cache — so cached data shows its true age. Data older than a per-list threshol
 marked "may be out of date". If a browser refresh fails, the previous data stays with a
 "couldn't refresh" note.
 
-## No team logos
+## Team logos
 
-CricketData.org's terms forbid hotlinking its images, and football-data.org's crest
-terms could not be verified. Teams are shown with short-code badges instead.
+- **Cricket:** none. CricketData.org's terms forbid hotlinking its images, so teams
+  show short-code badges.
+- **Football:** club crests are shown (approved by the project owner, 2026-11-04),
+  using the crest links football-data.org includes with every team. No crest usage
+  terms could be found, and the crests belong to the clubs, so this relies on
+  non-commercial portfolio use. Images use `unoptimized` so they don't consume
+  Vercel's image-optimization quota. Remove them if the provider or a club objects.
+
+## Football extras: league table (approved 2026-11-04)
+
+Requested: goal scorers, lineups, club crests. **Goal scorers and lineups are not
+available on the free plan** (they need football-data.org's "Free + Deep Data" plan,
+€29/month), so they were not added rather than shown incompletely. Crests (above)
+and the **league table** (included in the free plan) were added. Match pages show the
+competition's table with both teams highlighted; each competition's table is cached
+for an hour (at most one call per competition per hour) and is simply hidden for
+knockout cups or if it can't be loaded.
 
 ## Team IDs for favourites
 
