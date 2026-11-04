@@ -8,8 +8,9 @@ unavailable, the site says so.
 ## Features (V1)
 
 - Live scores, upcoming fixtures (next 7 days) and recent results (last 7 days)
-- Basic match details — cricket: teams, scores, overs, status; football: teams,
-  goals, match minute, status, final result. Only fields the provider sends.
+- Match details — cricket: teams, every innings with overs, status, venue, toss;
+  football: teams, goals, match minute, status, final result, half-time score,
+  venue, round. Only fields the provider sends.
 - Honest "Updated X ago" indicator, with an out-of-date warning
 - Sport tabs, competition filter, team/competition search
 - Favourite teams (shown first) and dark/light theme, saved in the browser
@@ -62,6 +63,7 @@ copies those variables into the JavaScript sent to browsers.
   League, and others).
 - **Cricket refreshes about every 20 minutes** to stay inside CricketData.org's
   100 calls/day, and only matches from 7 days either side of today are available.
+  Each cricket match page opened uses one extra call (cached per match).
 - No team logos (provider image terms). See [DECISIONS.md](DECISIONS.md).
 - **Development tip:** a hard refresh (Ctrl+Shift+R) or "Disable cache" in DevTools
   makes `npm run dev` skip the server cache and call the providers directly. Use a

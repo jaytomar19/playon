@@ -22,6 +22,27 @@ also echoes the API key in an `apikey` field, which Playon never passes on.
 **Still to verify with a real key:** the size of football-data.org's free-plan delay,
 and whether `minute` is sent on the free plan.
 
+## Scope change: richer match details (approved 2026-11-04)
+
+The project owner approved extending match detail pages beyond the original V1 fields:
+
+- **Cricket:** every innings (team, innings number, runs/wickets, overs), venue, toss —
+  from CricAPI's `match_info` endpoint.
+- **Football:** venue, round (matchday or cup stage) and half-time score — already
+  included in football-data.org's match data.
+
+Lineups, scorecards, commentary and statistics remain out of scope.
+
+Cost: each cricket detail page opened calls `match_info` once (1 of 100 daily calls).
+To limit this, it is only called for matches already in the cached `cricScore` list
+(so made-up IDs cost nothing) and cached per match: 24 h once finished, 20 min while
+live, 6 h before the start. If the call fails or the quota is used up, the page still
+shows the basic details and says the extra details are unavailable.
+
+`match_info` innings labels are inconsistent ("sikkim Inning 1",
+"Manipur,Sikkim Inning 1"); the batting team is the name before the comma, which was
+checked against `cricScore`. Labels that don't match a team are shown as-is.
+
 ## Refresh / cache policy
 
 Provider responses are cached on the server with Next.js's `fetch` cache, so every
